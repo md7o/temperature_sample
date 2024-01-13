@@ -1,49 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:temperature_sample/api.dart';
+
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.teal,
-      ),
+      theme: ThemeData(primaryColor: Color.fromARGB(255, 200, 200, 200)),
       home: Home(),
     );
   }
 }
 
 class Home extends StatefulWidget {
-  Home({Key? key}) : super(key: key);
+  const Home({Key? key}) : super(key: key);
 
   @override
   _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  // Weather currentWeather;
+  late Weather currentWeather;
   late Status status;
   String error = "";
 
   Future<void> getWeather() async {
     String _error = "";
 
-    // try {
-    //   final _currentWeather = await API.instance.getCurrentWeather();
+    try {
+      final _currentWeather = await API.instance.getCurrentWeather();
 
-    //   setState(() {
-    //     currentWeather = _currentWeather;
-    //     status = Status.ACTIVE;
-    //   });
-    // } catch (e) {
-    //   _error = e;
-    //   setState(() {
-    //     error = _error;
-    //     status = Status.ERROR;
-    //   });
-    //   return;
-    // }
+      setState(() {
+        currentWeather = _currentWeather;
+        status = Status.ACTIVE;
+      });
+    } catch (e) {
+      _error = e.toString();
+      setState(() {
+        error = _error;
+        status = Status.ERROR;
+      });
+      return;
+    }
   }
 
   @override
@@ -56,80 +57,62 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0.0,
-        title: const Text("WEATHER TODAY"),
-      ),
+      backgroundColor: Theme.of(context).primaryColor,
       body: RefreshIndicator(
         onRefresh: getWeather,
-        child: Stack(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Container(
-              color: Theme.of(context).primaryColor.withOpacity(0.15),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+            if (status == Status.PENDING)
+              const Center(
+                child: CircularProgressIndicator.adaptive(),
+              ),
+            if (status == Status.ACTIVE)
+              Column(
                 children: [
-                  if (status == Status.PENDING)
-                    const Center(
-                      child: CircularProgressIndicator.adaptive(),
+                  Icon(
+                    Icons.location_pin,
+                    size: 30,
+                    color: Theme.of(context).primaryColorDark,
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    "${currentWeather.city}, ${currentWeather.country}",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColorDark,
                     ),
-                  if (status == Status.ACTIVE)
-                    Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.location_pin,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                            Text(
-                              "City, country",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        const Text(
-                          "38 degree",
-                          style: TextStyle(
-                            fontSize: 80,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Clear: clear sky",
-                              style: TextStyle(fontSize: 20),
-                            ),
-                          ],
-                        )
-                      ],
-                    )
+                  ),
                 ],
               ),
+            Text(
+              "${currentWeather.temp.toString()}°",
+              style: const TextStyle(
+                fontSize: 80,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            Column(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const HighlightedMsg(
-                  msg: "The information is using OpenWeather Public API, "
-                      "and is displaying the weather for your current location. "
-                      "Tempreture is in celcius.",
-                  color: null,
+                Image.network(currentWeather.getIcon(), height: 40),
+                Text(
+                  "${currentWeather.main}: ${currentWeather.desc}",
+                  style: TextStyle(fontSize: 20),
                 ),
-                if (status == Status.ERROR)
-                  HighlightedMsg(
-                    msg: "Error",
-                    color: Colors.red[100],
-                  ),
               ],
-            ),
+            )
+
+            // Column(
+            //   children: [
+            //     if (status == Status.ERROR)
+            //       HighlightedMsg(
+            //         msg: "Error",
+            //         color: Colors.red[100],
+            //       ),
+            //   ],
+            // ),
           ],
         ),
       ),
