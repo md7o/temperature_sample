@@ -1,19 +1,25 @@
+import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:temperature_sample/api.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-          primaryColor: const Color(0xFFC8C8C8),
-          fontFamily: GoogleFonts.josefinSans().fontFamily),
+        primaryColor: const Color(0xFF070717),
+        fontFamily: GoogleFonts.josefinSans().fontFamily,
+        textTheme: const TextTheme(
+          bodyMedium: TextStyle(color: Colors.white),
+        ),
+      ),
       home: const Home(),
     );
   }
@@ -78,74 +84,129 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
-      body: RefreshIndicator(
-        onRefresh: getWeather,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              const Text(
-                'Today\'s Report',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Lottie.asset(weatherAnimation(currentWeather?.main)),
-                  const SizedBox(
-                    width: 20,
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [
+            Color.fromARGB(255, 38, 51, 105),
+            Color.fromARGB(255, 0, 10, 29),
+          ],
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: RefreshIndicator(
+          onRefresh: getWeather,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      'Today\'s Report',
+                      style:
+                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                  Text(
-                    "Its ${currentWeather?.main}",
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 30),
+                AvatarGlow(
+                  glowColor: Theme.of(context).primaryColorDark,
+                  curve: Curves.ease,
+                  startDelay: Duration(microseconds: 5100),
+                  glowCount: 1,
+                  glowRadiusFactor: 0.2,
+
+                  // duration: const Duration(milliseconds: 200),
+                  child: Lottie.asset(
+                    weatherAnimation(currentWeather?.main),
+                    height: 200,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "${currentWeather?.temp.toString()}",
-                        style: const TextStyle(
+                ),
+                const SizedBox(width: 20),
+                Text(
+                  "Its ${currentWeather?.main}",
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "${currentWeather?.temp.toString()}",
+                      style: const TextStyle(
+                        fontSize: 80,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Text(
+                      '°',
+                      style: TextStyle(
                           fontSize: 80,
                           fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Text(
-                        '°',
-                        style: TextStyle(
-                            fontSize: 80,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue),
-                      )
-                    ],
-                  ),
-                ],
-              ),
-              if (status == Status.PENDING)
-                const Center(
-                  child: CircularProgressIndicator.adaptive(),
-                ),
-              if (status == Status.ACTIVE)
-                Column(
-                  children: [
-                    Icon(
-                      Icons.location_pin,
-                      size: 30,
-                      color: Theme.of(context).primaryColorDark,
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      "${currentWeather!.city}, ${currentWeather!.country}",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColorDark,
-                      ),
-                    ),
+                          color: Colors.blue),
+                    )
                   ],
                 ),
-            ],
+                if (status == Status.PENDING)
+                  const Center(
+                    child: CircularProgressIndicator.adaptive(),
+                  ),
+                if (status == Status.ACTIVE)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Container(
+                      width: double.infinity,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Theme.of(context).primaryColorDark,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Text(
+                                  "Location",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.location_pin,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              "Country:  ${currentWeather!.country} | City: ${currentWeather!.city}",
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
