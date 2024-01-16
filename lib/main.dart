@@ -90,8 +90,8 @@ class _HomeState extends State<Home> {
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
           colors: [
-            Color.fromARGB(255, 38, 51, 105),
-            Color.fromARGB(255, 0, 10, 29),
+            Color.fromARGB(255, 13, 23, 60),
+            Color.fromARGB(255, 0, 7, 20),
           ],
         ),
       ),
@@ -156,6 +156,9 @@ class _HomeState extends State<Home> {
                   const Center(
                     child: CircularProgressIndicator.adaptive(),
                   ),
+                const SizedBox(
+                  height: 30,
+                ),
                 if (status == Status.ACTIVE)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
