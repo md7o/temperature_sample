@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:temperature_sample/api.dart';
 
 void main() => runApp(MyApp());
@@ -9,8 +11,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primaryColor: Color.fromARGB(255, 200, 200, 200)),
-      home: Home(),
+      theme: ThemeData(
+          primaryColor: const Color(0xFFC8C8C8),
+          fontFamily: GoogleFonts.josefinSans().fontFamily),
+      home: const Home(),
     );
   }
 }
@@ -23,7 +27,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  late Weather currentWeather;
+  Weather? currentWeather;
   late Status status;
   String error = "";
 
@@ -47,6 +51,24 @@ class _HomeState extends State<Home> {
     }
   }
 
+  String weatherAnimation(String? main) {
+    if (main == null) return 'assets/A.json';
+
+    switch (main.toLowerCase()) {
+      case 'clouds':
+      case 'dust':
+      case 'fog':
+        return 'assets/A.json';
+      case 'rain':
+      case 'dizzle':
+        return 'assets/B.json';
+      case 'clear':
+        return 'assets/C.json';
+      default:
+        return 'assets/C.json';
+    }
+  }
+
   @override
   void initState() {
     status = Status.PENDING;
@@ -60,60 +82,71 @@ class _HomeState extends State<Home> {
       backgroundColor: Theme.of(context).primaryColor,
       body: RefreshIndicator(
         onRefresh: getWeather,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            if (status == Status.PENDING)
-              const Center(
-                child: CircularProgressIndicator.adaptive(),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              const Text(
+                'Today\'s Report',
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
-            if (status == Status.ACTIVE)
               Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.location_pin,
-                    size: 30,
-                    color: Theme.of(context).primaryColorDark,
+                  Lottie.asset(weatherAnimation(currentWeather?.main)),
+                  const SizedBox(
+                    width: 20,
                   ),
-                  const SizedBox(height: 20),
                   Text(
-                    "${currentWeather.city}, ${currentWeather.country}",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColorDark,
-                    ),
+                    "Its ${currentWeather?.main}",
+                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "${currentWeather?.temp.toString()}",
+                        style: const TextStyle(
+                          fontSize: 80,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Text(
+                        '°',
+                        style: TextStyle(
+                            fontSize: 80,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue),
+                      )
+                    ],
                   ),
                 ],
               ),
-            Text(
-              "${currentWeather.temp.toString()}°",
-              style: const TextStyle(
-                fontSize: 80,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.network(currentWeather.getIcon(), height: 40),
-                Text(
-                  "${currentWeather.main}: ${currentWeather.desc}",
-                  style: TextStyle(fontSize: 20),
+              if (status == Status.PENDING)
+                const Center(
+                  child: CircularProgressIndicator.adaptive(),
                 ),
-              ],
-            )
-
-            // Column(
-            //   children: [
-            //     if (status == Status.ERROR)
-            //       HighlightedMsg(
-            //         msg: "Error",
-            //         color: Colors.red[100],
-            //       ),
-            //   ],
-            // ),
-          ],
+              if (status == Status.ACTIVE)
+                Column(
+                  children: [
+                    Icon(
+                      Icons.location_pin,
+                      size: 30,
+                      color: Theme.of(context).primaryColorDark,
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      "${currentWeather!.city}, ${currentWeather!.country}",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColorDark,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
     );
