@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import "package:http/http.dart" as http;
-import 'package:temperature_sample/key.dart';
 
 enum Status { PENDING, ACTIVE, ERROR }
 
@@ -30,6 +29,8 @@ class API {
 
   Future<Weather> getCurrentWeather() async {
     try {
+      // Geolocator.openLocationSettings();
+
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
